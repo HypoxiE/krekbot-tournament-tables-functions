@@ -1,0 +1,51 @@
+=
+IFERROR(
+	{
+		SPLIT('Служебная информация'!B5; ",");
+		LET(
+			data;
+			ТРАНСП({
+				ТРАНСП(IMPORTRANGE('Служебная информация'!B4; 'Служебная информация'!B2));
+				ТРАНСП(IMPORTRANGE('Служебная информация'!B4; 'Служебная информация'!B3))
+			});
+			cols; SEQUENCE(1; ЧИСЛСТОЛБ(data); 1);
+			not_pass_end_array; ARRAYFORMULA(REPT("Не пройдено"; SEQUENCE(1; ЧИСЛСТОЛБ(data); 1; 0)));
+			not_moderated; ARRAYFORMULA(REPT("Не проверено"; SEQUENCE(1; ЧИСЛСТОЛБ(data); 1; 0)));
+			clear_data; 
+			ARRAYFORMULA(
+				IF(
+					data = "";
+					IF((cols = 4)+(cols = 5)+(cols = 19)+(cols = 22); IF((cols = 19)+(cols = 22); IF((cols = 19); not_pass_end_array; not_moderated); data); 0);
+					data
+				)
+			);
+			count_columns; ЧИСЛСТОЛБ(clear_data);
+
+			data_last_column; ИНДЕКС(clear_data;; count_columns);
+			not_blocked_data; FILTER(clear_data; data_last_column > 0);
+			not_blocked_data_points_column; ИНДЕКС(not_blocked_data;;count_columns);
+			not_blocked_data_cost_column; ИНДЕКС(not_blocked_data;;count_columns-2);
+
+			sorted_data; SORT(not_blocked_data; not_blocked_data_points_column; 0; not_blocked_data_cost_column; 0);
+			sorted_data_names_column; ИНДЕКС(sorted_data;;2);
+
+			unique_data; SORTN(sorted_data; 9^9; 2; sorted_data_names_column;);
+			unique_data_points_column; ИНДЕКС(unique_data;;count_columns);
+			unique_data_cost_column; ИНДЕКС(unique_data;;count_columns-2);
+
+			unique_sorted_data; SORT(unique_data; unique_data_points_column; 0; unique_data_cost_column; 0);
+			top_10_limit; ARRAY_CONSTRAIN(unique_sorted_data; 10; count_columns);
+
+			sorted_data
+		)
+	};
+	{
+		SPLIT('Служебная информация'!B5; ",");
+		ТРАНСП(
+			{
+				"Пока заявок нет";
+				ТРАНСП(ARRAYFORMULA(ПОВТОР(""; SEQUENCE(1; ЧИСЛСТОЛБ(SPLIT('Служебная информация'!B5; ","))-1; 1; 0))))
+			}
+		)
+	}
+)
