@@ -1,0 +1,1 @@
+# Google sheets code for [Krek4at\`s tournaments](https://discord.gg/gHubjfEg5M)
